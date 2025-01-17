@@ -16,6 +16,7 @@ export const TEMPLATE_VARIABLES = {
   citekey: 'Unique citekey',
   abstract: '',
   authorString: 'Comma-separated list of author names',
+  authors: 'List of author names',
   containerTitle:
     'Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)',
   DOI: '',
@@ -51,6 +52,7 @@ export class Library {
 
       abstract: entry.abstract,
       authorString: entry.authorString,
+      authors: entry.authors,
       containerTitle: entry.containerTitle,
       DOI: entry.DOI,
       eprint: entry.eprint,
@@ -134,6 +136,7 @@ export abstract class Entry {
 
   public abstract abstract?: string;
   public abstract author?: Author[];
+  public abstract authors?: string[];
 
   /**
    * A comma-separated list of authors, each of the format `<firstname> <lastname>`.
@@ -229,6 +232,7 @@ export interface EntryDataCSL {
 
   abstract?: string;
   author?: Author[];
+  authors?: string[];
   'container-title'?: string;
   DOI?: string;
   'event-place'?: string;
@@ -263,6 +267,12 @@ export class EntryCSLAdapter extends Entry {
   }
   get author() {
     return this.data.author;
+  }
+
+  get authors(): string[] | null {
+    return this.data.author
+      ? this.data.author.map((a) => `${a.given} ${a.family}`)
+      : null;
   }
 
   get authorString(): string | null {
@@ -462,5 +472,11 @@ export class EntryBibLaTeXAdapter extends Entry {
       given: a.firstName,
       family: a.lastName,
     }));
+  }
+
+  get authors(): string[] {
+    return this.data.creators.author?.map(
+      (a) => `${a.firstName} ${a.lastName}`,
+    );
   }
 }
